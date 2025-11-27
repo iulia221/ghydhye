@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎄 New Year Crossword</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #e6f7ff, #ffffff);
+      text-align: center;
+      padding: 20px;
+      color: #2c3e50;
+    }
+
+    h1 {
+      color: #c0392b;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
+    }
+
+    .crossword-grid {
+      display: inline-grid;
+      grid-template-columns: repeat(10, 40px);
+      grid-gap: 1px;
+      background-color: #000;
+      padding: 6px;
+      margin: 20px auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .cell {
+      width: 40px;
+      height: 40px;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+      color: #000;
+    }
+
+    .black {
+      background-color: #000;
+    }
+
+    .legend {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 16px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    .legend h2 {
+      margin-top: 0;
+      color: #c0392b;
+    }
+
+    .legend ol {
+      padding-left: 20px;
+    }
+
+    .legend li {
+      margin-bottom: 8px;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎄 New Year Crossword Puzzle</h1>
+
+  <div class="crossword-grid" id="grid">
+    <!-- Grid will be filled by JavaScript -->
+  </div>
+
+  <div class="legend">
+    <h2>Clues:</h2>
+    <ol>
+      <li>A present under the tree</li>
+      <li>Jingle ___ – they ring with holiday cheer</li>
+      <li>Decorated with lights and ornaments</li>
+      <li>White winter flakes</li>
+      <li>The most magical holiday of the season!</li>
+    </ol>
+    <p><strong>Words:</strong> GIFT, BELLS, TREE, SNOW, CHRISTMAS</p>
+  </div>
+
+  <footer>
+    Happy Holidays! ✨
+  </footer>
+
+  <script>
+    // Create a 10x10 empty grid (filled with '' = black cells)
+    let grid = Array(10).fill(null).map(() => Array(10).fill(''));
+
+    // 1. CHRISTMAS – horizontal, row 0, columns 0–8
+    const christmas = "CHRISTMAS".split("");
+    for (let i = 0; i < christmas.length; i++) {
+      grid[0][i] = christmas[i];
+    }
+
+    // 2. SNOW – vertical, starting at (0,2) → S at [0][2] already from CHRISTMAS
+    // S (0,2), N (1,2), O (2,2), W (3,2)
+    grid[1][2] = 'N';
+    grid[2][2] = 'O';
+    grid[3][2] = 'W';
+
+    // 3. TREE – horizontal, row 3, columns 4–7
+    grid[3][4] = 'T';
+    grid[3][5] = 'R';
+    grid[3][6] = 'E';
+    grid[3][7] = 'E';
+
+    // 4. BELLS – vertical, starting at (3,6) → E from TREE is at [3][6]
+    // B(0,6), E(1,6), L(2,6), L(3,6), S(4,6)
+    grid[0][6] = 'B';
+    grid[1][6] = 'E';
+    grid[2][6] = 'L';
+    grid[3][6] = 'L'; // already 'E' from TREE — conflict!
+
+    // 🔁 Let's fix: move BELLS to column 8 instead
+    // Place BELLS vertically at column 8
+    grid[0][8] = 'B'; // C H R I S T M A S → [0][8] = 'S', so we can't overwrite!
+
+    // Better plan: place BELLS vertically at column 4
+    // But [3][4] = 'T' (from TREE)
+
+    // ✅ Revised layout:
+    // - CHRISTMAS: row 0, col 0–8 → [0][4] = 'S', [0][6] = 'T'
+    // Let's place BELLS vertically from row 2 to 6 in column 5
+
+    // Reset BELLS and TREE to avoid conflict
+    // Clear previous attempts
+    grid[3][4] = grid[3][5] = grid[3][6] = grid[3][7] = '';
+    grid[0][6] = grid[1][6] = grid[2][6] = grid[3][6] = grid[4][6] = '';
+
+    // ✅ Final placement:
+    // CHRISTMAS: row 0, col 0–8
+    // SNOW: vertical at col 2 → rows 0–3
+    // TREE: horizontal at row 6, col 2–5
+    // BELLS: vertical at col 5, rows 2–6
+    // GIFT: vertical at col 1, rows 4–7
+
+    // Rebuild grid clearly:
+
+    grid = Array(10).fill(null).map(() => Array(10).fill(''));
+
+    // CHRISTMAS (0,0 to 0,8)
+    "CHRISTMAS".split('').forEach((c, i) => grid[0][i] = c);
+
+    // SNOW (vertical at col 2)
+    grid[1][2] = 'N';
+    grid[2][2] = 'O';
+    grid[3][2] = 'W';
+
+    // TREE (row 6, col 2–5)
+    grid[6][2] = 'T';
+    grid[6][3] = 'R';
+    grid[6][4] = 'E';
+    grid[6][5] = 'E';
+
+    // BELLS (vertical at col 5, rows 2–6)
+    grid[2][5] = 'B';
+    grid[3][5] = 'E';
+    grid[4][5] = 'L';
+    grid[5][5] = 'L';
+    grid[6][5] = 'S'; // overlaps with TREE's last 'E' → conflict!
+
+    // 🔁 Fix: make TREE end at col 4, so [6][5] is free for 'S'
+    // But TREE is 4 letters → T R E E → needs 4 cells
+
+    // ✅ New idea: place TREE vertically!
+    // TREE vertical at col 7: T(2,7), R(3,7), E(4,7), E(5,7)
+
+    grid[2][7] = 'T';
+    grid[3][7] = 'R';
+    grid[4][7] = 'E';
+    grid[5][7] = 'E';
+
+    // BELLS vertical at col 5: B(2,5), E(3,5), L(4,5), L(5,5), S(6,5)
+    grid[2][5] = 'B';
+    grid[3][5] = 'E';
+    grid[4][5] = 'L';
+    grid[5][5] = 'L';
+    grid[6][5] = 'S';
+
+    // GIFT vertical at col 1: G(4,1), I(5,1), F(6,1), T(7,1)
+    grid[4][1] = 'G';
+    grid[5][1] = 'I';
+    grid[6][1] = 'F';
+    grid[7][1] = 'T';
+
+    // Render the grid
+    const gridEl = document.getElementById('grid');
+    for (let row = 0; row < 10; row++) {
+      for (let col = 0; col < 10; col++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        const val = grid[row][col];
+        if (val === '') {
+          cell.classList.add('black');
+        } else {
+          cell.textContent = val;
+        }
+        gridEl.appendChild(cell);
+      }
+    }
+  </script>
+</body>
+</html>
