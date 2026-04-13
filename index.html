@@ -64,7 +64,342 @@
   Ошибка на обучении (MSE): 0.017924961358695184
 Ошибка на тесте (MSE): 0.026325157357722947
 
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🦷 Стоматология — Модель БД и индексы</title>
+  <style>
+    :root { --p:#2c7be5; --bg:#f8f9fa; --card:#fff; --text:#212529; --border:#dee2e6; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:system-ui, -apple-system, sans-serif; line-height:1.6; color:var(--text); background:var(--bg); padding-bottom:3rem; }
+    header { background:linear-gradient(135deg,var(--p),#1a68d1); color:#fff; padding:2rem 1rem; text-align:center; }
+    header h1 { font-size:1.8rem; margin-bottom:.5rem; }
+    .subtitle { opacity:.9; }
+    nav { background:var(--card); border-bottom:1px solid var(--border); padding:1rem; position:sticky; top:0; z-index:100; box-shadow:0 2px 4px rgba(0,0,0,.05); }
+    nav ul { list-style:none; display:flex; flex-wrap:wrap; gap:.5rem 1rem; }
+    nav a { color:var(--p); text-decoration:none; font-size:.95rem; }
+    nav a:hover { text-decoration:underline; }
+    main { max-width:1100px; margin:2rem auto; padding:0 1rem; }
+    section { background:var(--card); border-radius:12px; padding:1.5rem; margin-bottom:2rem; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    section h2 { border-bottom:2px solid var(--p); padding-bottom:.5rem; margin-bottom:1rem; color:#1a68d1; }
+    article { border-left:4px solid var(--p); padding-left:1rem; margin:1.2rem 0; }
+    article h3 { margin-bottom:.6rem; }
+    .diagram { background:#fff; border:1px solid var(--border); border-radius:8px; padding:1rem; margin:1rem 0; overflow-x:auto; }
+    .diagram svg { max-width:100%; height:auto; }
+    .btn { display:inline-block; padding:.5rem 1rem; background:var(--p); color:#fff; text-decoration:none; border-radius:6px; font-size:.9rem; margin:.3rem .3rem .3rem 0; }
+    .btn:hover { background:#1a68d1; }
+    .btn-outline { background:transparent; border:2px solid var(--p); color:var(--p); }
+    .btn-outline:hover { background:var(--p); color:#fff; }
+    code { background:#f1f1f1; padding:.2rem .4rem; border-radius:4px; font-family:monospace; font-size:.9em; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1rem; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1rem; }
+    .card h4 { color:var(--p); margin-bottom:.5rem; }
+    .index-list { list-style:none; }
+    .index-list li { background:#f8f9fa; padding:.4rem .6rem; margin:.3rem 0; border-radius:4px; border-left:3px solid var(--p); font-family:monospace; font-size:.9rem; }
+    footer { text-align:center; padding:2rem 1rem; color:#666; font-size:.9rem; }
+    @media(max-width:768px){ nav ul{flex-direction:column;gap:.3rem;} header h1{font-size:1.5rem;} }
+  </style>
+</head>
+<body>
 
+<header>
+  <h1>🦷 База данных: Стоматологическое отделение</h1>
+  <p class="subtitle">Иерархическая модель + схемы индексов (draw.io)</p>
+</header>
+
+<nav>
+  <ul>
+    <li><a href="#hierarchy">1. Иерархия</a></li>
+    <li><a href="#primary">2. Основные индексы</a></li>
+    <li><a href="#secondary">3. Вторичные индексы</a></li>
+    <li><a href="#download">📥 Скачать</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- 1. ИЕРАРХИЧЕСКАЯ МОДЕЛЬ -->
+<section id="hierarchy">
+  <h2>1️⃣ Общая иерархическая модель</h2>
+  <p><b>Сущности:</b> Врач, Медсестра, Операция (по 5 атрибутов)</p>
+  
+  <div class="diagram">
+    <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+      <!-- Стоматология -->
+      <rect x="320" y="10" width="160" height="40" rx="8" fill="#dae8fc" stroke="#6c8ebf" stroke-width="2"/>
+      <text x="400" y="35" text-anchor="middle" font-weight="bold">Стоматология</text>
+      
+      <!-- Врач -->
+      <rect x="30" y="90" width="200" height="130" fill="#dae8fc" stroke="#6c8ebf" stroke-width="2"/>
+      <text x="130" y="110" text-anchor="middle" font-weight="bold">Врач</text>
+      <text x="40" y="130" font-size="11">◼ id (PK)</text>
+      <text x="40" y="147" font-size="11">◼ fio</text>
+      <text x="40" y="164" font-size="11">◼ license</text>
+      <text x="40" y="181" font-size="11">◼ experience_years</text>
+      <text x="40" y="198" font-size="11">◼ specialty</text>
+      
+      <!-- Медсестра -->
+      <rect x="300" y="90" width="200" height="130" fill="#d5e8d4" stroke="#82b366" stroke-width="2"/>
+      <text x="400" y="110" text-anchor="middle" font-weight="bold">Медсестра</text>
+      <text x="310" y="130" font-size="11">◼ id (PK)</text>
+      <text x="310" y="147" font-size="11">◼ fio</text>
+      <text x="310" y="164" font-size="11">◼ certificate</text>
+      <text x="310" y="181" font-size="11">◼ zone</text>
+      <text x="310" y="198" font-size="11">◼ cabinet</text>
+      
+      <!-- Операция -->
+      <rect x="570" y="90" width="200" height="130" fill="#f8cecc" stroke="#b85450" stroke-width="2"/>
+      <text x="670" y="110" text-anchor="middle" font-weight="bold">Операция</text>
+      <text x="580" y="130" font-size="11">◼ id (PK)</text>
+      <text x="580" y="147" font-size="11">◼ mkb_code</text>
+      <text x="580" y="164" font-size="11">◼ name</text>
+      <text x="580" y="181" font-size="11">◼ date</text>
+      <text x="580" y="198" font-size="11">◼ duration_min</text>
+      
+      <!-- Связи -->
+      <line x1="400" y1="50" x2="130" y2="90" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="400" y1="50" x2="400" y2="90" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="400" y1="50" x2="670" y2="90" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="180" y1="155" x2="620" y2="155" stroke="#000" stroke-width="1" stroke-dasharray="4" marker-end="url(#er-many)"/>
+      <line x1="450" y1="155" x2="620" y2="155" stroke="#000" stroke-width="1" stroke-dasharray="4" marker-end="url(#er-many)"/>
+      
+      <!-- Маркеры стрелок -->
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#000"/>
+        </marker>
+        <marker id="er-many" markerWidth="12" markerHeight="12" refX="12" refY="6" orient="auto">
+          <path d="M0,2 Q6,6 0,10 M3,1 Q9,6 3,11" stroke="#000" fill="none"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+  
+  <a href="data:application/xml,<mxfile><diagram name='hierarchy'>...</diagram></mxfile>" class="btn" download>📥 Скачать hierarchy_model.drawio</a>
+</section>
+
+
+<!-- 2. ОСНОВНЫЕ ИНДЕКСЫ -->
+<section id="primary">
+  <h2>2️⃣ Схемы основных индексов (B+‑Tree)</h2>
+  <p class="info">Для запроса <code>SELECT * FROM doctor</code> используется последовательное сканирование листьев кластеризованного индекса по первичному ключу.</p>
+  
+  <article>
+    <h3>👨‍⚕️ Врач — Primary Index (id)</h3>
+    <div class="diagram">
+      <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg">
+        <!-- Root -->
+        <rect x="250" y="20" width="200" height="50" rx="6" fill="#dae8fc" stroke="#6c8ebf"/>
+        <text x="350" y="42" text-anchor="middle" font-weight="bold">Root: [1-50] | [51-100]</text>
+        
+        <!-- Leaves -->
+        <rect x="50" y="120" width="260" height="110" rx="6" fill="#fff2cc" stroke="#d6b656"/>
+        <text x="180" y="140" text-anchor="middle" font-weight="bold">Leaf 1</text>
+        <text x="60" y="160" font-size="10">[1|Иванов С.Ю.|Л-67563|5|Хирургия]</text>
+        <text x="60" y="177" font-size="10">[25|Петров И.И.|Л-12345|10|Терапия]</text>
+        <text x="60" y="194" font-size="10">[49|Сидоров П.П.|Л-98765|3|Ортодонтия]</text>
+        
+        <rect x="390" y="120" width="260" height="110" rx="6" fill="#fff2cc" stroke="#d6b656"/>
+        <text x="520" y="140" text-anchor="middle" font-weight="bold">Leaf 2</text>
+        <text x="400" y="160" font-size="10">[51|Козлов А.А.|Л-54321|7|Хирургия]</text>
+        <text x="400" y="177" font-size="10">[75|Морозова А.С.|Л-11111|2|Педиатрия]</text>
+        <text x="400" y="194" font-size="10">[100|Волков Д.В.|Л-22222|15|Ортопедия]</text>
+        
+        <!-- Edges -->
+        <line x1="350" y1="70" x2="180" y2="120" stroke="#000"/>
+        <line x1="350" y1="70" x2="520" y2="120" stroke="#000"/>
+        <line x1="180" y1="230" x2="520" y2="230" stroke="#000" stroke-dasharray="4" marker-end="url(#arrow-small)" marker-start="url(#arrow-small)"/>
+        
+        <defs>
+          <marker id="arrow-small" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L3,3 L0,6" fill="none" stroke="#000"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </article>
+
+  <article>
+    <h3>👩‍⚕️ Медсестра — Primary Index (id)</h3>
+    <div class="diagram">
+      <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+        <rect x="250" y="20" width="200" height="50" rx="6" fill="#d5e8d4" stroke="#82b366"/>
+        <text x="350" y="42" text-anchor="middle" font-weight="bold">Root: [1-30] | [31-60]</text>
+        <rect x="50" y="110" width="260" height="90" rx="6" fill="#fff2cc" stroke="#d6b656"/>
+        <text x="180" y="130" text-anchor="middle" font-weight="bold">Leaf 1</text>
+        <text x="60" y="150" font-size="10">[1|Лаврова Т.А.|С-76547|Опер.№4|Каб327]</text>
+        <text x="60" y="167" font-size="10">[15|Смирнова Е.И.|С-12345|Приём|Каб101]</text>
+        <text x="60" y="184" font-size="10">[30|Морозова О.Н.|С-98765|Рентген|Каб205]</text>
+        <rect x="390" y="110" width="260" height="90" rx="6" fill="#fff2cc" stroke="#d6b656"/>
+        <text x="520" y="130" text-anchor="middle" font-weight="bold">Leaf 2</text>
+        <text x="400" y="150" font-size="10">[31|Волкова М.Д.|С-54321|Стерил.|Каб103]</text>
+        <text x="400" y="167" font-size="10">[45|Лебедева А.В.|С-11111|Опер.№4|Каб327]</text>
+        <text x="400" y="184" font-size="10">[60|Кузнецова И.С.|С-22222|Приём|Каб101]</text>
+        <line x1="350" y1="70" x2="180" y2="110" stroke="#000"/>
+        <line x1="350" y1="70" x2="520" y2="110" stroke="#000"/>
+        <line x1="180" y1="200" x2="520" y2="200" stroke="#000" stroke-dasharray="4"/>
+      </svg>
+    </div>
+  </article>
+
+  <article>
+    <h3>🔪 Операция — Primary Index (id)</h3>
+    <div class="diagram">
+      <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+        <rect x="250" y="20" width="200" height="50" rx="6" fill="#f8cecc" stroke="#b85450"/>
+        <text x="350" y="42" text-anchor="middle" font-weight="bold">Root: [1000-1050] | [1051-1100]</text>
+        <rect x="50" y="110" width="260" height="90" rx="6" fill="#fff2cc" stroke="#d6b656"/>
+        <text x="180" y="130" text-anchor="middle" font-weight="bold">Leaf 1</text>
+        <text x="60" y="150" font-size="10">[1005|МКБ.564|Удаление зуба|2024-04-01|40мин]</text>
+        <text x="60" y="167" font-size="10">[1020|МКБ.123|Пломбирование|2024-04-02|30мин]</text>
+        <text x="60" y="184" font-size="10">[1045|МКБ.789|Имплантация|2024-04-03|90мин]</text>
+        <rect x="390" y="110" width="260" height="90" rx="6" fill="#fff2cc" stroke="#d6b656"/>
+        <text x="520" y="130" text-anchor="middle" font-weight="bold">Leaf 2</text>
+        <text x="400" y="150" font-size="10">[1055|МКБ.456|Чистка|2024-04-04|20мин]</text>
+        <text x="400" y="167" font-size="10">[1080|МКБ.789|Коррекция|2024-04-05|60мин]</text>
+        <text x="400" y="184" font-size="10">[1100|МКБ.101|Удаление кисты|2024-04-06|50мин]</text>
+        <line x1="350" y1="70" x2="180" y2="110" stroke="#000"/>
+        <line x1="350" y1="70" x2="520" y2="110" stroke="#000"/>
+        <line x1="180" y1="200" x2="520" y2="200" stroke="#000" stroke-dasharray="4"/>
+      </svg>
+    </div>
+  </article>
+</section>
+
+
+<!-- 3. ВТОРИЧНЫЕ ИНДЕКСЫ -->
+<section id="secondary">
+  <h2>3️⃣ Вторичные индексы (по 3 на сущность)</h2>
+  
+  <div class="grid">
+    <div class="card">
+      <h4>👨‍⚕️ Врач</h4>
+      <ul class="index-list">
+        <li>idx_specialty → [специализация → [id]]</li>
+        <li>idx_fio → [фамилия → [id]]</li>
+        <li>idx_experience → [стаж → [id]]</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>👩‍⚕️ Медсестра</h4>
+      <ul class="index-list">
+        <li>idx_zone → [зона → [id]]</li>
+        <li>idx_cabinet → [кабинет → [id]]</li>
+        <li>idx_certificate → [сертификат → [id]]</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>🔪 Операция</h4>
+      <ul class="index-list">
+        <li>idx_date → [дата → [id]]</li>
+        <li>idx_mkb → [код МКБ → [id]]</li>
+        <li>idx_duration → [длительность → [id]]</li>
+      </ul>
+    </div>
+  </div>
+
+  <article style="margin-top:1.5rem">
+    <h3>📊 Пример структуры вторичного индекса</h3>
+    <div class="diagram">
+      <svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="560" height="160" rx="8" fill="#e1d5e7" stroke="#9673a6"/>
+        <text x="300" y="40" text-anchor="middle" font-weight="bold">idx_specialty (B+ Tree, некластеризованный)</text>
+        <text x="40" y="70" font-size="11"><tspan font-weight="bold">"Хирургия"</tspan> → [doctor_id: 1, 51]</text>
+        <text x="40" y="90" font-size="11"><tspan font-weight="bold">"Терапия"</tspan> → [doctor_id: 25]</text>
+        <text x="40" y="110" font-size="11"><tspan font-weight="bold">"Ортодонтия"</tspan> → [doctor_id: 49]</text>
+        <text x="40" y="130" font-size="11"><tspan font-weight="bold">"Педиатрия"</tspan> → [doctor_id: 75]</text>
+        <text x="40" y="150" font-size="11"><tspan font-weight="bold">"Ортопедия"</tspan> → [doctor_id: 100]</text>
+        <text x="300" y="180" text-anchor="middle" font-size="10" fill="#666">⚠️ Хранит только [ключ → PK], затем lookup в основную таблицу</text>
+      </svg>
+    </div>
+  </article>
+</section>
+
+
+<!-- СКАЧАТЬ -->
+<section id="download">
+  <h2>📥 Скачать все 7 файлов</h2>
+  <p>Нажмите правой кнопкой → «Сохранить как» или скопируйте код в новые файлы:</p>
+  
+  <div class="grid">
+    <div class="card">
+      <h4>1. hierarchy_model.drawio</h4>
+      <a href="#" class="btn btn-outline" onclick="alert('Скопируйте код из секции <svg> в новый файл .drawio')">📋 Скопировать XML</a>
+    </div>
+    <div class="card">
+      <h4>2. doctor_primary_index.drawio</h4>
+      <a href="#" class="btn btn-outline">📋 Скопировать</a>
+    </div>
+    <div class="card">
+      <h4>3. nurse_primary_index.drawio</h4>
+      <a href="#" class="btn btn-outline">📋 Скопировать</a>
+    </div>
+    <div class="card">
+      <h4>4. operation_primary_index.drawio</h4>
+      <a href="#" class="btn btn-outline">📋 Скопировать</a>
+    </div>
+    <div class="card">
+      <h4>5. doctor_secondary_indexes.drawio</h4>
+      <a href="#" class="btn btn-outline">📋 Скопировать</a>
+    </div>
+    <div class="card">
+      <h4>6. nurse_secondary_indexes.drawio</h4>
+      <a href="#" class="btn btn-outline">📋 Скопировать</a>
+    </div>
+    <div class="card">
+      <h4>7. operation_secondary_indexes.drawio</h4>
+      <a href="#" class="btn btn-outline">📋 Скопировать</a>
+    </div>
+  </div>
+  
+  <p style="margin-top:1.5rem; background:#e7f3ff; padding:1rem; border-radius:8px; border-left:4px solid #2c7be5;">
+    <b>🚀 Как выложить на GitHub Pages:</b><br>
+    1. Создайте репозиторий на GitHub<br>
+    2. Загрузите этот файл как <code>index.html</code><br>
+    3. Settings → Pages → Source: main branch → Save<br>
+    4. Сайт будет доступен по: <code>https://ВАШ_НИК.github.io/РЕПОЗИТОРИЙ/</code>
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>🦷 Учебный проект по базам данных • 2026</p>
+  <p><small>Диаграммы созданы в draw.io • Хостинг: GitHub Pages</small></p>
+</footer>
+
+<script>
+  // Плавная прокрутка
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.onclick = function(e) {
+      const href = this.getAttribute('href');
+      if(href !== '#' && document.querySelector(href)) {
+        e.preventDefault();
+        document.querySelector(href).scrollIntoView({behavior:'smooth'});
+      }
+    }
+  });
+  
+  // Подсветка активного раздела
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navLinks.forEach(link => {
+          link.style.fontWeight = link.getAttribute('href') === `#${id}` ? '600' : '400';
+        });
+      }
+    });
+  }, {threshold: 0.3});
+  sections.forEach(sec => observer.observe(sec));
+</script>
+
+</body>
+</html>р
 
   
 </html>
